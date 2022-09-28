@@ -1,20 +1,20 @@
 // import { getMatch, getMatchIds } from "./api";
 import { useState, useEffect } from "react";
 import Accordion from "react-bootstrap/Accordion";
-import Denmark from "./assets/Denmark.png";
-import Finland from "./assets/Finland.png";
+import India from "./assets/India.png";
+import Pakistan from "./assets/Pakistan.png";
 import Bet from "./components/Bet";
 import "./styles/Home.css";
 import { getMatchIds, getMatch } from "./contractApi";
-import React from "react"
+import React from "react";
 
 const Home = ({ account, active }) => {
   const [matchIds, setMatchIds] = useState([]);
   const [schedule, setSchedule] = useState([]);
 
   const images = {
-    Denmark: Denmark,
-    Finland: Finland,
+    India: India,
+    Pakistan: Pakistan,
   };
 
   //   gets match ids

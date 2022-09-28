@@ -46,3 +46,11 @@ export const checkBet = async (_matchId, account) => {
   if (typeof betContract === "undefined") await init();
   return betContract.methods.alreadyBet(_matchId, account).call();
 };
+
+export const availResults = async (_matchId, account) => {
+  if (typeof betContract === "undefined") await init();
+  return betContract.methods
+    .availPrice(_matchId)
+    .call()
+    .sender({ from: account });
+};

@@ -3,16 +3,18 @@ import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Alert from "react-bootstrap/Alert";
 import { useState, useEffect } from "react";
-import { placeBet, checkBet } from "../contractApi";
+import { placeBet, checkBet, availResults } from "../contractApi";
 import "../styles/Bet.css";
-import React from "react"
+import React from "react";
 
 const Bet = ({ match, account, active }) => {
   const [alreadyPlaced, setAlreadyPlaced] = useState(false);
   const [amount, setAmount] = useState();
   const [choice, setChoice] = useState(-1);
   const [matchStatus, setMatchStatus] = useState();
+  const [viewRes, setViewRes] = useState(false);
 
+  //   to update match status acc to date
   useEffect(() => {
     let x = setInterval(() => {
       let now = Math.floor(new Date().getTime());
@@ -26,6 +28,7 @@ const Bet = ({ match, account, active }) => {
     }, 1000);
   }, [match.startDate, match.endDate]);
 
+  //   get list of match ids
   useEffect(() => {
     if (typeof account === "undefined") {
       setAlreadyPlaced(false);
@@ -39,14 +42,17 @@ const Bet = ({ match, account, active }) => {
       .catch((err) => console.log(err));
   }, [account, match.matchId]);
 
+  //   handler for prediction
   const handleChoice = (_choice) => {
     setChoice(_choice);
   };
 
+  //   handler for bet amount
   const handleChange = (e) => {
     setAmount(e.target.value);
   };
 
+  //   handles and validates form before submit
   const handleSubmit = (e) => {
     e.preventDefault();
     if (typeof account === "undefined") {
@@ -70,25 +76,35 @@ const Bet = ({ match, account, active }) => {
     }
   };
 
+  const handleAwail = () => {
+    setViewRes(true);
+    availResults(match.matchId, account)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className="betInterface">
-      {/* {matchStatus} */}
-      {!active ? (
+      {viewRes ? (
+        <>Results</>
+      ) : !active ? (
         <Alert variant="warning">Connect to Metamask</Alert>
       ) : alreadyPlaced ? (
         <div className="alertWrapper">
           <Alert variant="success">You have already placed a bet!</Alert>
           {matchStatus === -1 ? (
-            <Button variant="success">Avail Results!</Button>
+            <Button variant="success" onClick={handleAwail}>
+              Avail Results!
+            </Button>
           ) : (
             <Button variant="success" disabled>
               Come back Later!
             </Button>
           )}
         </div>
-      ) : matchStatus === -1 ? (
-        <Alert variant="danger">You can no longer bet</Alert>
       ) : (
+        //   ) : matchStatus === -1 ? (
+        //     <Alert variant="danger">You can no longer bet</Alert>
         <Form onSubmit={handleSubmit} className="betForm">
           <Form.Label>Enter Bet Amount:</Form.Label>
           <InputGroup>
