@@ -2,6 +2,7 @@ import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import Metamask from "../assets/Metamask.png";
 import "../styles/Header.css";
+import React from "react"
 
 const Header = ({ active, account, connect, disconnect }) => {
   return (

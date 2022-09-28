@@ -6,6 +6,7 @@ import Finland from "./assets/Finland.png";
 import Bet from "./components/Bet";
 import "./styles/Home.css";
 import { getMatchIds, getMatch } from "./contractApi";
+import React from "react"
 
 const Home = ({ account, active }) => {
   const [matchIds, setMatchIds] = useState([]);

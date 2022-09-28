@@ -8,6 +8,7 @@ contract bet {
     struct Bet {
         uint256 matchId;
         address player;
+        uint amount;
         uint256 prediction;
         uint256 bet_time;
     }
@@ -15,6 +16,7 @@ contract bet {
     struct MatchBet {
         uint256 matchId;
         uint256 totalCount;
+        uint256 total_amount;
         uint256 total_team1_win;
         uint256 total_team1_amount;
         uint256 total_team2_win;
@@ -24,6 +26,11 @@ contract bet {
         mapping(address => Bet) bets;
         mapping(address => bool) players;
     }
+
+    // keeping track of price distribution
+    mapping(uint256 => mapping(address => bool)) availedPrice;
+    mapping(address => bool) availedList;
+    // address [] availedList;
 
     // storing all match bet detials
     mapping(uint256 => MatchBet) allBets;
@@ -52,7 +59,7 @@ contract bet {
             "you have alredy placed a bet on this match"
         );
         require(
-            block.timestamp <= (game.getMatch(matchId).endDate - 86400),
+            block.timestamp <= (game.getMatch(matchId).startDate - 86400),
             "The duration of bettig on this Match is over."
         );
 
@@ -62,7 +69,7 @@ contract bet {
             "Please send atleast minimum amount to bet"
         ); // ether in wei
 
-        Bet memory bet1 = Bet(matchId, msg.sender, prediction, block.timestamp);
+        Bet memory bet1 = Bet(matchId, msg.sender, amount, prediction, block.timestamp);
 
         // first bet on a match
         if (!startedBet[matchId]) {
@@ -75,6 +82,7 @@ contract bet {
             match1.totalCount = 1;
             match1.bets[msg.sender] = bet1;
             match1.players[msg.sender] = true;
+            match1.total_amount = amount;
 
             if (prediction == 1) {
                 match1.total_team1_win = 1;
@@ -99,26 +107,15 @@ contract bet {
                 match1.total_tie_amount = amount;
             }
 
-            // if(prediction==1){
-            //     match1 = MatchBet(matchId,1,1,amount,0,0,0,0,bet1, true);
-            // }
-            // else if(prediction==2){
-            //     match1 = MatchBet(matchId,1,0,0,1,amount,0,0,bet1, true);
-            // }
-            // else if(prediction=0){
-            //     match1 = MatchBet(matchId,1,0,0,0,0,1,amount,bet1, true);
-            // }
-
-            // allBets[matchId]  = match1;
         } else {
             MatchBet storage match2;
             match2 = allBets[matchId];
 
             if (matchId == match2.matchId) {
-                match2.matchId = matchId;
                 match2.totalCount += 1;
                 match2.bets[msg.sender] = bet1;
                 match2.players[msg.sender] = true;
+                match2.total_amount += amount;
 
                 if (prediction == 1) {
                     match2.total_team1_win += 1;
@@ -132,6 +129,51 @@ contract bet {
                 }
             }
         }
+    }
+
+    // rerturns a particular bet details
+    function getBetDetails(uint256 matchId, address user) public view returns(Bet memory){
+        Bet memory userBet = allBets[matchId].bets[user];
+
+        return userBet;
+    }
+
+    function exists(address [] memory list, address user) public view returns(bool){
+        for(uint i; i<=list.length; i++){
+            if(list[i] == user){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function availPrice(uint256 matchId) public {
+        require(allBets[matchId].players[msg.sender], "you have not placed a bet on this match");
+        require(allBets[matchId].bets[msg.sender].prediction == game.getResults(matchId));
+
+        require(!availedPrice[matchId][msg.sender], "you have already availed price for this match");
+
+        Bet memory userBet = getBetDetails(matchId, msg.sender);
+        MatchBet storage m = allBets[matchId];
+        uint price;
+
+        if(userBet.prediction == 1 && userBet.prediction == game.getResults(matchId)){
+            price = (userBet.amount/m.total_team1_amount)*m.total_amount;
+        }
+        else if(userBet.prediction == 2 && userBet.prediction == game.getResults(matchId)){
+            price = (userBet.amount/m.total_team2_amount)*m.total_amount;
+        }
+        else if(userBet.prediction == 0 && userBet.prediction == game.getResults(matchId)){
+            price = (userBet.amount/m.total_tie_amount)*m.total_amount;
+        }
+
+        sendPrice( payable(msg.sender) , price);
+        availedPrice[matchId][msg.sender] = true;
+
+    }
+
+    function sendPrice(address payable user, uint price) private {
+        user.transfer(price);
     }
 }
 
@@ -161,8 +203,8 @@ contract matches {
     mapping(uint256 => uint256) public results;
 
     constructor() {
-        Team memory team1 = Team(185, "Denmark");
-        Team memory team2 = Team(556, "Finland");
+        Team memory team1 = Team(185, "India");
+        Team memory team2 = Team(556, "Pakistan");
         A_match memory match1 = A_match(
             47288,
             "1st T20I",
@@ -194,8 +236,6 @@ contract matches {
         matchIds.push(47290);
     }
 
-    // results[47288] ;
-    // results[47290] = 2;
 
     function getMatchIds() external view returns (uint256[] memory) {
         return matchIds;

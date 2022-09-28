@@ -5,6 +5,7 @@ import Alert from "react-bootstrap/Alert";
 import { useState, useEffect } from "react";
 import { placeBet, checkBet } from "../contractApi";
 import "../styles/Bet.css";
+import React from "react"
 
 const Bet = ({ match, account, active }) => {
   const [alreadyPlaced, setAlreadyPlaced] = useState(false);
