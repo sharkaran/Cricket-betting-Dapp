@@ -179,9 +179,11 @@ const Bet = ({ match, account, active }) => {
               </Button>
             </div>
           </Form.Group>
-          <Button variant="danger" type="submit" className="placeBetBtn">
-            Place a Bet!
-          </Button>
+          <div className="placeBtnWrapper">
+            <Button variant="danger" type="submit" className="placeBetBtn">
+              Place a Bet!
+            </Button>
+          </div>
         </Form>
       )}
     </div>

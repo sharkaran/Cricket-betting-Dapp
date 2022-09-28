@@ -19,9 +19,10 @@
   gap: 1rem;
 }
 
-.placeBetBtn {
-  display: flex;
-  margin: 1rem auto;
+.placeBtnWrapper {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
 }
 
 .alertWrapper {

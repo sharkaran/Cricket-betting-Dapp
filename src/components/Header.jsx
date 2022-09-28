@@ -3,13 +3,13 @@ import Container from "react-bootstrap/Container";
 import Metamask from "../assets/Metamask.png";
 import Alert from "react-bootstrap/Alert";
 import "../styles/Header.css";
-import React from "react"
+import React from "react";
 
 const Header = ({ active, account, connect, disconnect }) => {
   return (
     <Navbar bg="dark" variant="dark">
       <Container>
-        <Navbar.Brand>Cricket Betting Dapp</Navbar.Brand>
+        <Navbar.Brand>Bet N Bowl</Navbar.Brand>
         <div
           onClick={active ? disconnect : connect}
           className="metamask-wrapper"
