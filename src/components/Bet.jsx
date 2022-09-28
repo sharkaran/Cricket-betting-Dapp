@@ -10,16 +10,29 @@ const Bet = ({ match, account, active }) => {
   const [alreadyPlaced, setAlreadyPlaced] = useState(false);
   const [amount, setAmount] = useState();
   const [choice, setChoice] = useState(-1);
+  const [matchStatus, setMatchStatus] = useState();
+
+  useEffect(() => {
+    let x = setInterval(() => {
+      let now = Math.floor(new Date().getTime());
+      if (now < parseInt(match.startDate)) {
+        setMatchStatus(1);
+      } else if (now < parseInt(match.endDate)) {
+        setMatchStatus(0);
+      } else {
+        setMatchStatus(-1);
+      }
+    }, 1000);
+  }, [match.startDate, match.endDate]);
 
   useEffect(() => {
     if (typeof account === "undefined") {
-      console.log(account);
       setAlreadyPlaced(false);
       return;
     }
     checkBet(match.matchId, account)
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         setAlreadyPlaced(res);
       })
       .catch((err) => console.log(err));
@@ -58,10 +71,22 @@ const Bet = ({ match, account, active }) => {
 
   return (
     <div className="betInterface">
+      {/* {matchStatus} */}
       {!active ? (
         <Alert variant="warning">Connect to Metamask</Alert>
       ) : alreadyPlaced ? (
-        <Alert variant="success">You have already placed a bet!</Alert>
+        <div className="alertWrapper">
+          <Alert variant="success">You have already placed a bet!</Alert>
+          {matchStatus === -1 ? (
+            <Button variant="success">Avail Results!</Button>
+          ) : (
+            <Button variant="success" disabled>
+              Come back Later!
+            </Button>
+          )}
+        </div>
+      ) : matchStatus === -1 ? (
+        <Alert variant="danger">You can no longer bet</Alert>
       ) : (
         <Form onSubmit={handleSubmit} className="betForm">
           <Form.Label>Enter Bet Amount:</Form.Label>

@@ -1,3 +1,9 @@
 .metamask-wrapper {
   cursor: pointer;
 }
+
+.alert {
+  display: inline;
+  padding: 0.5rem !important;
+  margin: 0 0.5rem;
+}
