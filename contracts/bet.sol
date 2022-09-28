@@ -33,8 +33,12 @@ contract bet {
     matches game = new matches();
 
     // checks if player had already bet on given match
-    function alreadyBet(uint256 matchId) public view returns (bool) {
-        return allBets[matchId].players[msg.sender];
+    function alreadyBet(uint256 matchId, address user)
+        public
+        view
+        returns (bool)
+    {
+        return allBets[matchId].players[user];
     }
 
     function betOnMatch(
