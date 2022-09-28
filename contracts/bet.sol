@@ -8,7 +8,7 @@ contract bet {
     struct Bet {
         uint256 matchId;
         address player;
-        uint amount;
+        uint256 amount;
         uint256 prediction;
         uint256 bet_time;
     }
@@ -52,17 +52,17 @@ contract bet {
         uint256 matchId,
         uint256 amount,
         uint256 prediction,
-        uint timestamp
+        uint256 timestamp
     ) public payable {
         // player must not bet more than once on a particuar match
         require(
             !allBets[matchId].players[msg.sender],
             "you have alredy placed a bet on this match"
         );
-        require(
-            timestamp <= (game.getMatch(matchId).startDate - 86400),
-            "The duration of bettig on this Match is over."
-        );
+        // require(
+        //     timestamp <= (game.getMatch(matchId).startDate - 86400),
+        //     "The duration of betting on this Match is over."
+        // );
 
         // bet amount should be equal to or greater than minimumBet
         require(
@@ -70,7 +70,13 @@ contract bet {
             "Please send atleast minimum amount to bet"
         ); // ether in wei
 
-        Bet memory bet1 = Bet(matchId, msg.sender, amount, prediction, timestamp);
+        Bet memory bet1 = Bet(
+            matchId,
+            msg.sender,
+            amount,
+            prediction,
+            timestamp
+        );
 
         // first bet on a match
         if (!startedBet[matchId]) {
@@ -107,7 +113,6 @@ contract bet {
                 match1.total_tie = 1;
                 match1.total_tie_amount = amount;
             }
-
         } else {
             MatchBet storage match2;
             match2 = allBets[matchId];
@@ -133,7 +138,11 @@ contract bet {
     }
 
     // rerturns a particular bet details
-    function getBetDetails(uint256 matchId, address user) public view returns(Bet memory){
+    function getBetDetails(uint256 matchId, address user)
+        public
+        view
+        returns (Bet memory)
+    {
         Bet memory userBet = allBets[matchId].bets[user];
 
         return userBet;
@@ -148,31 +157,48 @@ contract bet {
     //     return false;
 
     function availPrice(uint256 matchId) public payable {
-        require(allBets[matchId].players[msg.sender], "you have not placed a bet on this match");
-        require(allBets[matchId].bets[msg.sender].prediction == game.getResults(matchId));
+        require(
+            allBets[matchId].players[msg.sender],
+            "you have not placed a bet on this match"
+        );
+        require(
+            allBets[matchId].bets[msg.sender].prediction ==
+                game.getResults(matchId),
+            "you lost your money"
+        );
 
-        require(!availedPrice[matchId][msg.sender], "you have already availed price for this match");
+        require(
+            !availedPrice[matchId][msg.sender],
+            "you have already availed price for this match"
+        );
 
         Bet memory userBet = getBetDetails(matchId, msg.sender);
         MatchBet storage m = allBets[matchId];
-        uint price;
+        uint256 price;
 
-        if(userBet.prediction == 1 && userBet.prediction == game.getResults(matchId)){
-            price = (userBet.amount/m.total_team1_amount)*m.total_amount;
-        }
-        else if(userBet.prediction == 2 && userBet.prediction == game.getResults(matchId)){
-            price = (userBet.amount/m.total_team2_amount)*m.total_amount;
-        }
-        else if(userBet.prediction == 0 && userBet.prediction == game.getResults(matchId)){
-            price = (userBet.amount/m.total_tie_amount)*m.total_amount;
+        if (
+            userBet.prediction == 1 &&
+            userBet.prediction == game.getResults(matchId)
+        ) {
+            price = (userBet.amount / m.total_team1_amount) * m.total_amount;
+        } else if (
+            userBet.prediction == 2 &&
+            userBet.prediction == game.getResults(matchId)
+        ) {
+            price = (userBet.amount / m.total_team2_amount) * m.total_amount;
+        } else if (
+            userBet.prediction == 0 &&
+            userBet.prediction == game.getResults(matchId)
+        ) {
+            price = (userBet.amount / m.total_tie_amount) * m.total_amount;
         }
 
-        sendPrice( payable(msg.sender) , price);
+        sendPrice(payable(msg.sender), price);
+        // payable(msg.sender).transfer(price, );
         availedPrice[matchId][msg.sender] = true;
-
     }
 
-    function sendPrice(address payable user, uint price) private {
+    function sendPrice(address payable user, uint256 price) private {
         user.transfer(price);
     }
 
@@ -243,7 +269,6 @@ contract matches {
         matchIds.push(47288);
         matchIds.push(47290);
     }
-
 
     function getMatchIds() external view returns (uint256[] memory) {
         return matchIds;

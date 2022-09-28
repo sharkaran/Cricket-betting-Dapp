@@ -3,7 +3,7 @@ import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Alert from "react-bootstrap/Alert";
 import { useState, useEffect } from "react";
-import { placeBet, checkBet, availResults } from "../contractApi";
+import { placeBet, checkBet, availResults, getResults } from "../contractApi";
 import "../styles/Bet.css";
 import React from "react";
 
@@ -13,6 +13,8 @@ const Bet = ({ match, account, active }) => {
   const [choice, setChoice] = useState(-1);
   const [matchStatus, setMatchStatus] = useState();
   const [viewRes, setViewRes] = useState(false);
+  const [result, setResult] = useState({ status: null, message: "" });
+  const [winningRes, setWinningRes] = useState(NaN);
 
   //   to update match status acc to date
   useEffect(() => {
@@ -62,7 +64,8 @@ const Bet = ({ match, account, active }) => {
     } else if (choice === -1) {
       alert("Please select a result");
     } else {
-      placeBet(match.matchId, amount, choice, account)
+      const timestamp = new Date().getTime();
+      placeBet(match.matchId, amount, choice, account, timestamp)
         .then((res) => {
           console.log(res);
           checkBet(match.matchId, account)
@@ -78,15 +81,44 @@ const Bet = ({ match, account, active }) => {
 
   const handleAwail = () => {
     setViewRes(true);
-    availResults(match.matchId, account)
-      .then((res) => console.log(res))
+    getResults(match.matchId)
+      .then((res) => {
+        console.log(res);
+        setWinningRes(parseInt(res));
+      })
       .catch((err) => console.log(err));
+    availResults(match.matchId, account)
+      .then((res) => {
+        console.log(res);
+        setResult({ status: true, message: "You won!" });
+      })
+      .catch((err) => {
+        console.log(err);
+        setResult({ status: false, message: "You lost the bet!" });
+      });
   };
+
+  useEffect(() => {
+    setResult({ status: null, message: "" });
+    setViewRes(false);
+  }, [account]);
 
   return (
     <div className="betInterface">
       {viewRes ? (
-        <>Results</>
+        <div className="resultViewWrapper">
+          <Alert variant="success">
+            Result:{" "}
+            {winningRes === 1
+              ? `${match.team1.name} Won!`
+              : winningRes === 2
+              ? `${match.team2.name} Won!`
+              : "It was a draw"}
+          </Alert>
+          <Alert variant={result.status ? "success" : "danger"}>
+            {result.message}
+          </Alert>
+        </div>
       ) : !active ? (
         <Alert variant="warning">Connect to Metamask</Alert>
       ) : alreadyPlaced ? (

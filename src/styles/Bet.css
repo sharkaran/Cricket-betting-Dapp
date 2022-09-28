@@ -11,6 +11,14 @@
   gap: 1rem;
 }
 
+.resultViewWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .placeBetBtn {
   display: flex;
   margin: 1rem auto;
