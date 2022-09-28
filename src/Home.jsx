@@ -1,13 +1,13 @@
-import { getMatch, getMatchIds } from "./api";
+// import { getMatch, getMatchIds } from "./api";
 import { useState, useEffect } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import Denmark from "./assets/Denmark.png";
 import Finland from "./assets/Finland.png";
-import Button from "react-bootstrap/Button";
-import { Link } from "react-router-dom";
+import Bet from "./components/Bet";
 import "./styles/Home.css";
+import { getMatchIds, getMatch } from "./contractApi";
 
-const Home = () => {
+const Home = ({ account, active }) => {
   const [matchIds, setMatchIds] = useState([]);
   const [schedule, setSchedule] = useState([]);
 
@@ -16,23 +16,33 @@ const Home = () => {
     Finland: Finland,
   };
 
+  //   gets match ids
   useEffect(() => {
-    const ids = getMatchIds();
-    setMatchIds(ids);
+    getMatchIds()
+      .then((res) => {
+        const ids = res;
+        setMatchIds(ids);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
+  //   gets matches
   useEffect(() => {
     if (matchIds.length === 0) return;
-    const tempSchedule = [];
+    let tempSchedule = [];
     matchIds.forEach((id) => {
-      const match = getMatch(id);
-      tempSchedule.push(match);
+      getMatch(id)
+        .then((match) => {
+          tempSchedule = [...tempSchedule, match];
+          setSchedule(tempSchedule);
+        })
+        .catch((err) => console.log(err));
     });
-    setSchedule(tempSchedule);
   }, [matchIds]);
 
+  //   convert milliseconds to readable date
   const getDate = (seconds) => {
-    const date = new Date(seconds);
+    const date = new Date(parseInt(seconds));
     return date.toDateString();
   };
 
@@ -47,35 +57,41 @@ const Home = () => {
                 {match.team1.name} vs {match.team2.name} - {match.matchFormat}
               </Accordion.Header>
               <Accordion.Body>
-                <div className="dateWrapper">
-                  <span>Start Date: {getDate(match.startDate)}</span>
-                  <span>End Date: {getDate(match.endDate)}</span>
-                </div>
-                <div className="imageVSWrapper">
-                  <div className="teamImageWrapper">
-                    <img
-                      className="teamImage"
-                      src={images[match.team1.name]}
-                      alt={match.team1.name}
-                      loading="lazy"
-                    />
-                    <h4>{match.team1.name}</h4>
+                <div className="matchInfo">
+                  <div className="dateWrapper">
+                    <div>
+                      <span>Start:</span> {getDate(match.startDate)}
+                    </div>
+                    <div>
+                      <span>End:</span> {getDate(match.endDate)}
+                    </div>
                   </div>
-                  <span>VS</span>
-                  <div className="teamImageWrapper">
-                    <img
-                      className="teamImage"
-                      src={images[match.team2.name]}
-                      alt={match.team2.name}
-                      loading="lazy"
-                    />
-                    <h4>{match.team2.name}</h4>
+                  <div className="imageVSWrapper">
+                    <div className="teamImageWrapper">
+                      <img
+                        className="teamImage"
+                        src={images[match.team1.name]}
+                        alt={match.team1.name}
+                        loading="lazy"
+                      />
+                      {match.team1.name}
+                    </div>
+                    <span>VS</span>
+                    <div className="teamImageWrapper">
+                      <img
+                        className="teamImage"
+                        src={images[match.team2.name]}
+                        alt={match.team2.name}
+                        loading="lazy"
+                      />
+                      {match.team2.name}
+                    </div>
                   </div>
+                  <p className="matchDesc">
+                    <span>Description:</span> {match.matchDesc}
+                  </p>
                 </div>
-                <p>Description: {match.matchDesc}</p>
-                <Link to={`bets/${match.matchId}`}>
-                  <Button variant="outline-warning">Place a Bet!</Button>
-                </Link>
+                <Bet match={match} account={account} active={active} />
               </Accordion.Body>
             </Accordion.Item>
           );

@@ -6,7 +6,6 @@ import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Web3ReactProvider } from "@web3-react/core";
 import Web3 from "web3";
-import { BrowserRouter } from "react-router-dom";
 
 const getLibrary = (provider) => {
   return new Web3(provider);
@@ -16,9 +15,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Web3ReactProvider getLibrary={getLibrary}>
     <React.StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <App />
     </React.StrictMode>
   </Web3ReactProvider>
 );

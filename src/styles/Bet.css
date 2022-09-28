@@ -1,0 +1,17 @@
+.betInterface {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resultWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.placeBetBtn {
+  display: flex;
+  margin: 1rem auto;
+}
