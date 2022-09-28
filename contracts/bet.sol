@@ -51,7 +51,8 @@ contract bet {
     function betOnMatch(
         uint256 matchId,
         uint256 amount,
-        uint256 prediction
+        uint256 prediction,
+        uint timestamp
     ) public payable {
         // player must not bet more than once on a particuar match
         require(
@@ -59,7 +60,7 @@ contract bet {
             "you have alredy placed a bet on this match"
         );
         require(
-            block.timestamp <= (game.getMatch(matchId).startDate - 86400),
+            timestamp <= (game.getMatch(matchId).startDate - 86400),
             "The duration of bettig on this Match is over."
         );
 
@@ -69,7 +70,7 @@ contract bet {
             "Please send atleast minimum amount to bet"
         ); // ether in wei
 
-        Bet memory bet1 = Bet(matchId, msg.sender, amount, prediction, block.timestamp);
+        Bet memory bet1 = Bet(matchId, msg.sender, amount, prediction, timestamp);
 
         // first bet on a match
         if (!startedBet[matchId]) {
@@ -138,16 +139,15 @@ contract bet {
         return userBet;
     }
 
-    function exists(address [] memory list, address user) public view returns(bool){
-        for(uint i; i<=list.length; i++){
-            if(list[i] == user){
-                return true;
-            }
-        }
-        return false;
-    }
+    // function exists(address [] memory list, address user) public view returns(bool){
+    //     for(uint i; i<=list.length; i++){
+    //         if(list[i] == user){
+    //             return true;
+    //         }
+    //     }
+    //     return false;
 
-    function availPrice(uint256 matchId) public {
+    function availPrice(uint256 matchId) public payable {
         require(allBets[matchId].players[msg.sender], "you have not placed a bet on this match");
         require(allBets[matchId].bets[msg.sender].prediction == game.getResults(matchId));
 
@@ -175,6 +175,14 @@ contract bet {
     function sendPrice(address payable user, uint price) private {
         user.transfer(price);
     }
+
+    // function getBets(uint256 matchId) public view returns(mapping(address => Bet) memory){
+    //     return allBets[matchId].bets;
+    // }
+
+    // function getMatchDetail(uint256 matchId) public view {
+    //     return allBets[matchId];
+    // }
 }
 
 contract matches {
