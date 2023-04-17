@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity >=0.8.17;
 
 contract bet {
     // uint256 constant minimumbet = 0.004;
@@ -40,11 +40,10 @@ contract bet {
     matches game = new matches();
 
     // checks if player had already bet on given match
-    function alreadyBet(uint256 matchId, address user)
-        public
-        view
-        returns (bool)
-    {
+    function alreadyBet(
+        uint256 matchId,
+        address user
+    ) public view returns (bool) {
         return allBets[matchId].players[user];
     }
 
@@ -138,11 +137,10 @@ contract bet {
     }
 
     // rerturns a particular bet details
-    function getBetDetails(uint256 matchId, address user)
-        public
-        view
-        returns (Bet memory)
-    {
+    function getBetDetails(
+        uint256 matchId,
+        address user
+    ) public view returns (Bet memory) {
         Bet memory userBet = allBets[matchId].bets[user];
 
         return userBet;
@@ -193,14 +191,14 @@ contract bet {
             price = (userBet.amount / m.total_tie_amount) * m.total_amount;
         }
 
-        sendPrice(payable(msg.sender), price);
-        // payable(msg.sender).transfer(price, );
+        // sendPrice(payable(msg.sender), price);
+        payable(msg.sender).transfer(price);
         availedPrice[matchId][msg.sender] = true;
     }
 
-    function sendPrice(address payable user, uint256 price) private {
-        user.transfer(price);
-    }
+    // function sendPrice(address payable user, uint256 price) private {
+    //     user.transfer(price);
+    // }
 
     // function getBets(uint256 matchId) public view returns(mapping(address => Bet) memory){
     //     return allBets[matchId].bets;
